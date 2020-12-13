@@ -104,7 +104,7 @@ P(O=o|C=c)=\frac{exp(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}{\sum_{w\in Vocab
 naive-softmax loss function is given by
 \begin_inset Formula 
 \begin{equation}
-\mathbf{J}_{naiv-softmax}(\boldsymbol{v}_{c}\mathbf{,}o\mathbf{,}\boldsymbol{U})=-logP(O=o|C=c)\label{2}
+\boldsymbol{J}_{naive-softmax}(\boldsymbol{v}_{c}\mathbf{,}o\mathbf{,}\boldsymbol{U})=-logP(O=o|C=c)\label{2}
 \end{equation}
 
 \end_inset
@@ -189,7 +189,7 @@ H(y_{w},\hat{y}_{w})=-\sum_{w\in Vocab}y_{w}log(\hat{y}_{w})=-y_{o}log(\hat{y}_{
 \end_inset
 
 (b) Compute the partial derivate of 
-\begin_inset Formula $\mathbf{J}_{naive-softmax}(\boldsymbol{v}_{c}\mathbf{,}o\mathbf{,}\boldsymbol{U})$
+\begin_inset Formula $\boldsymbol{J}_{naive-softmax}(\boldsymbol{v}_{c}\mathbf{,}o\mathbf{,}\boldsymbol{U})$
 \end_inset
 
  with respect to 
@@ -310,7 +310,7 @@ In terms of
 \end_inset
 
 (c) Compute the partial derivate of 
-\begin_inset Formula $\mathbf{J}_{naive-softmax}(\boldsymbol{v}_{c}\mathbf{,}o\mathbf{,}\boldsymbol{U})$
+\begin_inset Formula $\boldsymbol{J}_{naive-softmax}(\boldsymbol{v}_{c}\mathbf{,}o\mathbf{,}\boldsymbol{U})$
 \end_inset
 
  with respect to each of the 'outside' word vectors, 

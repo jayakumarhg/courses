@@ -19,7 +19,7 @@ P(O=o|C=c)=\frac{exp(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}{\sum_{w\in Vocab
 \end{equation}
 \item naive-softmax loss function is given by
 \begin{equation}
-\mathbf{J}_{naiv-softmax}(\boldsymbol{v}_{c}\mathbf{,}o\mathbf{,}\boldsymbol{U})=-logP(O=o|C=c)\label{2}
+\boldsymbol{J}_{naive-softmax}(\boldsymbol{v}_{c}\mathbf{,}o\mathbf{,}\boldsymbol{U})=-logP(O=o|C=c)\label{2}
 \end{equation}
 \end{itemize}
 (a) Show that the naive-softmax loss given in Equation (2) is the
@@ -43,7 +43,7 @@ resulting in the below equality
 \[
 H(y_{w},\hat{y}_{w})=-\sum_{w\in Vocab}y_{w}log(\hat{y}_{w})=-y_{o}log(\hat{y}_{o})
 \]
-(b) Compute the partial derivate of $\mathbf{J}_{naive-softmax}(\boldsymbol{v}_{c}\mathbf{,}o\mathbf{,}\boldsymbol{U})$
+(b) Compute the partial derivate of $\boldsymbol{J}_{naive-softmax}(\boldsymbol{v}_{c}\mathbf{,}o\mathbf{,}\boldsymbol{U})$
 with respect to $\boldsymbol{v}_{c}$. Please write your answer in
 terms of $\boldsymbol{y},\boldsymbol{\hat{y}}$ and $\boldsymbol{U}$.
 
@@ -82,7 +82,7 @@ In terms of $\boldsymbol{y},\boldsymbol{\hat{y}}$ and $\boldsymbol{U}$:
 \[
 =U^{T}(\boldsymbol{\hat{y}-\boldsymbol{y})}
 \]
-(c) Compute the partial derivate of $\mathbf{J}_{naive-softmax}(\boldsymbol{v}_{c}\mathbf{,}o\mathbf{,}\boldsymbol{U})$
+(c) Compute the partial derivate of $\boldsymbol{J}_{naive-softmax}(\boldsymbol{v}_{c}\mathbf{,}o\mathbf{,}\boldsymbol{U})$
 with respect to each of the 'outside' word vectors, $\boldsymbol{u}_{w}$'s. 
 
 Solution:
