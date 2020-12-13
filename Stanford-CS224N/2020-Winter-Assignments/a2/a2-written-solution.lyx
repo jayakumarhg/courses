@@ -1,0 +1,834 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Stanford CS 224N Assignment #2 - Written Solution
+\end_layout
+
+\begin_layout Section*
+1.
+ Understanding word2vec
+\end_layout
+
+\begin_layout Standard
+In word2vec
+\end_layout
+
+\begin_layout Itemize
+conditional probability distribution is given by
+\begin_inset Formula 
+\begin{equation}
+P(O=o|C=c)=\frac{exp(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}\label{1}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+naive-softmax loss function is given by
+\begin_inset Formula 
+\begin{equation}
+\mathbf{J}_{naiv-softmax}(\boldsymbol{v}_{c}\mathbf{,}o\mathbf{,}\boldsymbol{U})=-logP(O=o|C=c)\label{2}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+(a) Show that the naive-softmax loss given in Equation (2) is the same as
+ the cross-entroy loss between 
+\series bold
+
+\begin_inset Formula $\boldsymbol{y}$
+\end_inset
+
+
+\series default
+ and 
+\begin_inset Formula $\boldsymbol{\hat{y}}$
+\end_inset
+
+, i.e.
+ show that
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+-\sum_{w\in Vocab}y_{w}log(\hat{y}_{w})=-log(\hat{y}_{o})\label{3}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Solution:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+H(y_{w},\hat{y}_{w})=-\sum_{w\in Vocab}y_{w}log(\hat{y}_{w})=-\sum_{w\neq o\;w\in Vocab}y_{w}log(\hat{y}_{w})-y_{o}log(\hat{y}_{o})
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+As 
+\series bold
+
+\begin_inset Formula $\boldsymbol{y}$
+\end_inset
+
+
+\series default
+is a one-hot encoded vector with a 1 for true outside word 
+\begin_inset Formula $o$
+\end_inset
+
+, and 0 everwhere else, 
+\begin_inset Formula $y_{w}=0$
+\end_inset
+
+ if 
+\begin_inset Formula $w\neq o$
+\end_inset
+
+, resulting in the below equality
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+H(y_{w},\hat{y}_{w})=-\sum_{w\in Vocab}y_{w}log(\hat{y}_{w})=-y_{o}log(\hat{y}_{o})
+\]
+
+\end_inset
+
+(b) Compute the partial derivate of 
+\begin_inset Formula $\mathbf{J}_{naive-softmax}(\boldsymbol{v}_{c}\mathbf{,}o\mathbf{,}\boldsymbol{U})$
+\end_inset
+
+ with respect to 
+\begin_inset Formula $\boldsymbol{v}_{c}$
+\end_inset
+
+.
+ Please write your answer in terms of 
+\begin_inset Formula $\boldsymbol{y},\boldsymbol{\hat{y}}$
+\end_inset
+
+ and 
+\begin_inset Formula $\boldsymbol{U}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Solution:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\boldsymbol{J}_{naive-softmax}(\boldsymbol{v}_{c},o,\boldsymbol{U)}}{\partial\boldsymbol{v}_{c}}=\frac{\partial-logP(O=o|C=c)}{\partial\boldsymbol{v}_{c}}=\frac{\partial-log(\frac{exp(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})})}{\partial\boldsymbol{v}_{c}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=\frac{\partial-log(exp(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{v}_{c}}-\frac{\partial-log(\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{v}_{c}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=-\boldsymbol{u}_{o}+\frac{1}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}\frac{\partial\sum_{x\in Vocab}exp(\boldsymbol{u}_{x}^{T}\boldsymbol{v}_{c})}{\partial\boldsymbol{v}_{c}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=-\boldsymbol{u}_{o}+\frac{1}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}\sum_{x\in Vocab}\frac{\partial exp(\boldsymbol{u}_{x}^{T}\boldsymbol{v}_{c})}{\partial\boldsymbol{v}_{c}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=-\boldsymbol{u}_{o}+\frac{1}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}\sum_{x\in Vocab}exp(\boldsymbol{u}_{x}^{T}\boldsymbol{v}_{c})\boldsymbol{u}_{x}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=-\boldsymbol{u}_{o}+\sum_{x\in Vocab}\frac{exp(\boldsymbol{u}_{x}^{T}\boldsymbol{v}_{c})}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}\boldsymbol{u}_{x}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=-\boldsymbol{u}_{o}+\sum_{x\in Vocab}P(O=x|C=c)\boldsymbol{u}_{x}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In terms of 
+\begin_inset Formula $\boldsymbol{y},\boldsymbol{\hat{y}}$
+\end_inset
+
+ and 
+\begin_inset Formula $\boldsymbol{U}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=U^{T}(\boldsymbol{\hat{y}-\boldsymbol{y})}
+\]
+
+\end_inset
+
+(c) Compute the partial derivate of 
+\begin_inset Formula $\mathbf{J}_{naive-softmax}(\boldsymbol{v}_{c}\mathbf{,}o\mathbf{,}\boldsymbol{U})$
+\end_inset
+
+ with respect to each of the 'outside' word vectors, 
+\begin_inset Formula $\boldsymbol{u}_{w}$
+\end_inset
+
+'s.
+ 
+\end_layout
+
+\begin_layout Standard
+Solution:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\boldsymbol{J}_{naive-softmax}(\boldsymbol{v}_{c},o,\boldsymbol{U)}}{\partial\boldsymbol{u}_{w}}=\frac{\partial-logP(O=o|C=c)}{\partial\boldsymbol{u}_{w}}=\frac{\partial-log(\frac{exp(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})})}{\partial\boldsymbol{u}_{w}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=\frac{\partial-log(exp(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{u}_{w}}-\frac{\partial-log(\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c}))}{\partial u_{w}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If 
+\begin_inset Formula $w=o$
+\end_inset
+
+, then
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=\frac{\partial-log(exp(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{u}_{o}}-\frac{\partial-log(\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{u}_{o}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=-\boldsymbol{v}_{c}+\frac{1}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}\frac{\partial\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}{\partial\boldsymbol{u}_{o}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=-\boldsymbol{v}_{c}+\frac{exp(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}\boldsymbol{v}_{c}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=(P(O=o|C=c)-1)\boldsymbol{v}_{c}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If 
+\begin_inset Formula $w\neq o$
+\end_inset
+
+, then
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=\frac{\partial-log(exp(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{u}_{w}}-\frac{\partial-log(\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{u}_{w}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=0+\frac{1}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}\frac{\partial\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}{\partial\boldsymbol{u}_{w}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=0+\frac{exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}\boldsymbol{v}_{c}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=P(O=w|C=c)\boldsymbol{v}_{c}
+\]
+
+\end_inset
+
+ In terms of terms of 
+\begin_inset Formula $\boldsymbol{y},\boldsymbol{\hat{y}}$
+\end_inset
+
+ and 
+\begin_inset Formula $\boldsymbol{v}_{c}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=(\hat{\boldsymbol{y}}-\boldsymbol{y})^{T}\boldsymbol{v}_{c}
+\]
+
+\end_inset
+
+(d) The sigmoid function is given by Equation 4:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\sigma(x)=\frac{1}{1+e^{-x}}=\frac{e^{x}}{e^{x}+1}\label{4}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Please compute the derivative of 
+\begin_inset Formula $\sigma(x)$
+\end_inset
+
+ with respect to 
+\begin_inset Formula $x$
+\end_inset
+
+, where 
+\begin_inset Formula $x$
+\end_inset
+
+is a scalar.
+ Hint: you may want to write your answer in terms of 
+\begin_inset Formula $\sigma(x)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Solution:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{d\sigma(x)}{dx}=\frac{d\frac{e^{x}}{e^{x}+1}}{dx}=\frac{\frac{de^{x}}{dx}(e^{x}+1)-e^{x}\frac{d(e^{x}+1)}{dx}}{(e^{x}+1)^{2}}=\frac{e^{x}(e^{x}+1)-e^{x}(e^{x}+0)}{(e^{x}+1)^{2}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=\frac{e^{x}}{(e^{x}+1)^{2}}=\frac{e^{x}}{e^{x}+1}(1-\frac{e^{e}}{e^{x}+1})=\sigma(x)(1-\sigma(x))
+\]
+
+\end_inset
+
+ (e) Now we shall consider the Negative Sampling loss, which is an alternative
+ to the Naive Softmax loss.
+ Assume that K negative samples (words) are drawn from the vocabulary.
+ For simplicity of notation we shall refer to them as 
+\begin_inset Formula $w_{1},w_{2},...,w_{K}$
+\end_inset
+
+ and their outside vectors as 
+\begin_inset Formula $\boldsymbol{u}_{1},\boldsymbol{u}_{2},...,\boldsymbol{u}_{K}$
+\end_inset
+
+.
+ Note that 
+\begin_inset Formula $o\notin\{w_{1},w_{2},...,w_{K}\}$
+\end_inset
+
+.
+ For a center word 
+\begin_inset Formula $c$
+\end_inset
+
+and an outside word 
+\begin_inset Formula $o$
+\end_inset
+
+, the negative sampling loss function is given by:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\boldsymbol{J}_{neg-sampe}(\boldsymbol{v}_{c},o,\boldsymbol{U})=-log(\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))-\sum_{k=1}^{K}log(\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c}))\label{5}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+for a sample 
+\begin_inset Formula $w_{1},w_{2},...,w_{K}$
+\end_inset
+
+, where 
+\begin_inset Formula $\sigma(.)$
+\end_inset
+
+ is a sigmoid function.
+ Please report parts (b) and (c), computing the partial derivatives of 
+\begin_inset Formula $\boldsymbol{J}_{neg-sampe}$
+\end_inset
+
+with respect to 
+\begin_inset Formula $\boldsymbol{v}_{c}$
+\end_inset
+
+, with respect to 
+\begin_inset Formula $\boldsymbol{u}_{o}$
+\end_inset
+
+, and with respect to a negative sample 
+\begin_inset Formula $\boldsymbol{u}_{k}$
+\end_inset
+
+.
+ Please write your answers in terms of the vectors 
+\begin_inset Formula $\boldsymbol{u}_{o}$
+\end_inset
+
+, 
+\begin_inset Formula $\boldsymbol{v}_{c}$
+\end_inset
+
+, and 
+\begin_inset Formula $\boldsymbol{u}_{k}$
+\end_inset
+
+, where 
+\begin_inset Formula $k\in[1,K]$
+\end_inset
+
+.
+ After you have done this, describe with one sentence why this loss function
+ is much more efficient to compute than the naive-softmax loss.
+\end_layout
+
+\begin_layout Standard
+Solution:
+\end_layout
+
+\begin_layout Standard
+Partial derivatives of 
+\begin_inset Formula $\boldsymbol{J}_{neg-sampe}$
+\end_inset
+
+with respect to 
+\begin_inset Formula $\boldsymbol{v}_{c}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\boldsymbol{J}_{neg-sampe}(\boldsymbol{v}_{c},o,\boldsymbol{U})}{\partial\boldsymbol{v}_{c}}=-\frac{\partial log(\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{v}_{c}}-\sum_{k=1}^{K}\frac{\partial log(\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{v}_{c}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=-\frac{1}{\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}\frac{\partial\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}{\partial\boldsymbol{v}_{c}}-\sum_{k=1}^{K}\frac{1}{\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c})}\frac{\partial\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c})}{\partial\boldsymbol{v}_{c}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=-\frac{\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})(1-\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))}{\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}\boldsymbol{u}_{o}+\sum_{k=1}^{K}\frac{\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c})(1-\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c}))}{\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c})}\boldsymbol{u}_{k}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=-(1-\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})\boldsymbol{u}_{o}+\sum_{k=1}^{K}(1-\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c}))\boldsymbol{u}_{k}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Partial derivatives of 
+\begin_inset Formula $\boldsymbol{J}_{neg-sampe}$
+\end_inset
+
+with respect to 
+\begin_inset Formula $\boldsymbol{u}_{o}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\boldsymbol{J}_{neg-sampe}(\boldsymbol{v}_{c},o,\boldsymbol{U})}{\partial\boldsymbol{u}_{o}}=-\frac{\partial log(\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{u}_{o}}-\sum_{k=1}^{K}\frac{\partial log(\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{u}_{o}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=-\frac{1}{\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}\frac{\partial\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}{\partial\boldsymbol{u}_{o}}-0=-\frac{\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})(1-\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))}{\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}\boldsymbol{v}_{c}=(1-\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))\boldsymbol{v}_{c}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Partial derivatives of 
+\begin_inset Formula $\boldsymbol{J}_{neg-sampe}$
+\end_inset
+
+with respect to 
+\begin_inset Formula $\boldsymbol{u}_{k}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial\boldsymbol{J}_{neg-sampe}(\boldsymbol{v}_{c},o,\boldsymbol{U})}{\partial\boldsymbol{u}_{k}}=-\frac{\partial log(\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{u}_{k}}-\sum_{k=1}^{K}\frac{\partial log(\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{u}_{k}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=-0-\frac{1}{\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c})}\frac{\partial\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c})}{\partial\boldsymbol{u}_{k}}=+\frac{\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c})(1-\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c}))}{\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c})}\boldsymbol{v}_{c}=(1-\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c}))\boldsymbol{v}_{c}
+\]
+
+\end_inset
+
+(f) Suppose the center word is 
+\begin_inset Formula $c=w_{t}$
+\end_inset
+
+ and the context window is 
+\begin_inset Formula $[w_{t-m},...,w_{t-1},w_{t},w_{t+1},...,w_{t+m}]$
+\end_inset
+
+, where m is the context window size.
+ Recall that for skip-gram version of word2vec, the total loss for the context
+ window is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\boldsymbol{J}_{skip-gram}(\boldsymbol{v}_{c},w_{t-m},...,w_{t+m},\boldsymbol{U})=\sum_{-m<=j<=m\;j\neq0}\boldsymbol{J}(\boldsymbol{v}_{c},w_{j},\boldsymbol{U)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Write down three partial derivatives:
+\end_layout
+
+\begin_layout Standard
+(i) 
+\begin_inset Formula $\frac{\partial\boldsymbol{J}_{skip-gram}(\boldsymbol{v}_{c},w_{t-m},...,w_{t+m},\boldsymbol{U})}{\partial\boldsymbol{U}}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+(ii) 
+\begin_inset Formula $\frac{\partial\boldsymbol{J}_{skip-gram}(\boldsymbol{v}_{c},w_{t-m},...,w_{t+m},\boldsymbol{U})}{\partial\boldsymbol{v}_{c}}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+(iii) 
+\begin_inset Formula $\frac{\partial\boldsymbol{J}_{skip-gram}(\boldsymbol{v}_{c},w_{t-m},...,w_{t+m},\boldsymbol{U})}{\partial\boldsymbol{v}_{w}}$
+\end_inset
+
+when 
+\begin_inset Formula $w\neq c$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Solution:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+(i)\frac{\partial\boldsymbol{J}_{skip-gram}(\boldsymbol{v}_{c},w_{t-m},...,w_{t+m},\boldsymbol{U})}{\partial\boldsymbol{U}}=\sum_{-m<=j<=m\;j\neq0}\frac{\boldsymbol{\partial J}(\boldsymbol{v}_{c},w_{j},\boldsymbol{U)}}{\partial U}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+(ii)\frac{\partial\boldsymbol{J}_{skip-gram}(\boldsymbol{v}_{c},w_{t-m},...,w_{t+m},\boldsymbol{U})}{\partial\boldsymbol{v}_{c}}=\sum_{-m<=j<=m\;j\neq0}\frac{\boldsymbol{\partial J}(\boldsymbol{v}_{c},w_{j},\boldsymbol{U)}}{\partial\boldsymbol{v}_{c}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+(iii)\frac{\partial\boldsymbol{J}_{skip-gram}(\boldsymbol{v}_{c},w_{t-m},...,w_{t+m},\boldsymbol{U})}{\partial\boldsymbol{u}_{w}}=\sum_{-m<=j<=m\;j\neq0}\frac{\boldsymbol{\partial J}(\boldsymbol{v}_{c},w_{j},\boldsymbol{U)}}{\partial\boldsymbol{u}_{w}}=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

@@ -1,0 +1,254 @@
+%% LyX 2.3.6 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[english]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage{amsbsy}
+\usepackage{babel}
+\begin{document}
+\title{Stanford CS 224N Assignment \#2 - Written Solution}
+\maketitle
+
+\section*{1. Understanding word2vec}
+
+In word2vec
+\begin{itemize}
+\item conditional probability distribution is given by
+\begin{equation}
+P(O=o|C=c)=\frac{exp(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}\label{1}
+\end{equation}
+\item naive-softmax loss function is given by
+\begin{equation}
+\mathbf{J}_{naiv-softmax}(\boldsymbol{v}_{c}\mathbf{,}o\mathbf{,}\boldsymbol{U})=-logP(O=o|C=c)\label{2}
+\end{equation}
+\end{itemize}
+(a) Show that the naive-softmax loss given in Equation (2) is the
+same as the cross-entroy loss between \textbf{$\boldsymbol{y}$} and
+$\boldsymbol{\hat{y}}$, i.e. show that
+
+\begin{equation}
+-\sum_{w\in Vocab}y_{w}log(\hat{y}_{w})=-log(\hat{y}_{o})\label{3}
+\end{equation}
+
+Solution:
+
+\[
+H(y_{w},\hat{y}_{w})=-\sum_{w\in Vocab}y_{w}log(\hat{y}_{w})=-\sum_{w\neq o\;w\in Vocab}y_{w}log(\hat{y}_{w})-y_{o}log(\hat{y}_{o})
+\]
+
+As \textbf{$\boldsymbol{y}$}is a one-hot encoded vector with a 1
+for true outside word $o$, and 0 everwhere else, $y_{w}=0$ if $w\neq o$,
+resulting in the below equality
+
+\[
+H(y_{w},\hat{y}_{w})=-\sum_{w\in Vocab}y_{w}log(\hat{y}_{w})=-y_{o}log(\hat{y}_{o})
+\]
+(b) Compute the partial derivate of $\mathbf{J}_{naive-softmax}(\boldsymbol{v}_{c}\mathbf{,}o\mathbf{,}\boldsymbol{U})$
+with respect to $\boldsymbol{v}_{c}$. Please write your answer in
+terms of $\boldsymbol{y},\boldsymbol{\hat{y}}$ and $\boldsymbol{U}$.
+
+Solution:
+
+\[
+\frac{\partial\boldsymbol{J}_{naive-softmax}(\boldsymbol{v}_{c},o,\boldsymbol{U)}}{\partial\boldsymbol{v}_{c}}=\frac{\partial-logP(O=o|C=c)}{\partial\boldsymbol{v}_{c}}=\frac{\partial-log(\frac{exp(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})})}{\partial\boldsymbol{v}_{c}}
+\]
+
+\[
+=\frac{\partial-log(exp(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{v}_{c}}-\frac{\partial-log(\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{v}_{c}}
+\]
+
+\[
+=-\boldsymbol{u}_{o}+\frac{1}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}\frac{\partial\sum_{x\in Vocab}exp(\boldsymbol{u}_{x}^{T}\boldsymbol{v}_{c})}{\partial\boldsymbol{v}_{c}}
+\]
+
+\[
+=-\boldsymbol{u}_{o}+\frac{1}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}\sum_{x\in Vocab}\frac{\partial exp(\boldsymbol{u}_{x}^{T}\boldsymbol{v}_{c})}{\partial\boldsymbol{v}_{c}}
+\]
+
+\[
+=-\boldsymbol{u}_{o}+\frac{1}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}\sum_{x\in Vocab}exp(\boldsymbol{u}_{x}^{T}\boldsymbol{v}_{c})\boldsymbol{u}_{x}
+\]
+
+\[
+=-\boldsymbol{u}_{o}+\sum_{x\in Vocab}\frac{exp(\boldsymbol{u}_{x}^{T}\boldsymbol{v}_{c})}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}\boldsymbol{u}_{x}
+\]
+
+\[
+=-\boldsymbol{u}_{o}+\sum_{x\in Vocab}P(O=x|C=c)\boldsymbol{u}_{x}
+\]
+
+In terms of $\boldsymbol{y},\boldsymbol{\hat{y}}$ and $\boldsymbol{U}$:
+
+\[
+=U^{T}(\boldsymbol{\hat{y}-\boldsymbol{y})}
+\]
+(c) Compute the partial derivate of $\mathbf{J}_{naive-softmax}(\boldsymbol{v}_{c}\mathbf{,}o\mathbf{,}\boldsymbol{U})$
+with respect to each of the 'outside' word vectors, $\boldsymbol{u}_{w}$'s. 
+
+Solution:
+
+\[
+\frac{\partial\boldsymbol{J}_{naive-softmax}(\boldsymbol{v}_{c},o,\boldsymbol{U)}}{\partial\boldsymbol{u}_{w}}=\frac{\partial-logP(O=o|C=c)}{\partial\boldsymbol{u}_{w}}=\frac{\partial-log(\frac{exp(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})})}{\partial\boldsymbol{u}_{w}}
+\]
+
+\[
+=\frac{\partial-log(exp(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{u}_{w}}-\frac{\partial-log(\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c}))}{\partial u_{w}}
+\]
+
+If $w=o$, then
+
+\[
+=\frac{\partial-log(exp(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{u}_{o}}-\frac{\partial-log(\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{u}_{o}}
+\]
+
+\[
+=-\boldsymbol{v}_{c}+\frac{1}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}\frac{\partial\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}{\partial\boldsymbol{u}_{o}}
+\]
+
+\[
+=-\boldsymbol{v}_{c}+\frac{exp(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}\boldsymbol{v}_{c}
+\]
+
+\[
+=(P(O=o|C=c)-1)\boldsymbol{v}_{c}
+\]
+
+If $w\neq o$, then
+
+\[
+=\frac{\partial-log(exp(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{u}_{w}}-\frac{\partial-log(\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{u}_{w}}
+\]
+
+\[
+=0+\frac{1}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}\frac{\partial\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}{\partial\boldsymbol{u}_{w}}
+\]
+
+\[
+=0+\frac{exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}{\sum_{w\in Vocab}exp(\boldsymbol{u}_{w}^{T}\boldsymbol{v}_{c})}\boldsymbol{v}_{c}
+\]
+
+\[
+=P(O=w|C=c)\boldsymbol{v}_{c}
+\]
+ In terms of terms of $\boldsymbol{y},\boldsymbol{\hat{y}}$ and $\boldsymbol{v}_{c}$:
+
+\[
+=(\hat{\boldsymbol{y}}-\boldsymbol{y})^{T}\boldsymbol{v}_{c}
+\]
+(d) The sigmoid function is given by Equation 4:
+
+\begin{equation}
+\sigma(x)=\frac{1}{1+e^{-x}}=\frac{e^{x}}{e^{x}+1}\label{4}
+\end{equation}
+
+Please compute the derivative of $\sigma(x)$ with respect to $x$,
+where $x$is a scalar. Hint: you may want to write your answer in
+terms of $\sigma(x)$.
+
+Solution:
+
+\[
+\frac{d\sigma(x)}{dx}=\frac{d\frac{e^{x}}{e^{x}+1}}{dx}=\frac{\frac{de^{x}}{dx}(e^{x}+1)-e^{x}\frac{d(e^{x}+1)}{dx}}{(e^{x}+1)^{2}}=\frac{e^{x}(e^{x}+1)-e^{x}(e^{x}+0)}{(e^{x}+1)^{2}}
+\]
+
+\[
+=\frac{e^{x}}{(e^{x}+1)^{2}}=\frac{e^{x}}{e^{x}+1}(1-\frac{e^{e}}{e^{x}+1})=\sigma(x)(1-\sigma(x))
+\]
+ (e) Now we shall consider the Negative Sampling loss, which is an
+alternative to the Naive Softmax loss. Assume that K negative samples
+(words) are drawn from the vocabulary. For simplicity of notation
+we shall refer to them as $w_{1},w_{2},...,w_{K}$ and their outside
+vectors as $\boldsymbol{u}_{1},\boldsymbol{u}_{2},...,\boldsymbol{u}_{K}$.
+Note that $o\notin\{w_{1},w_{2},...,w_{K}\}$. For a center word $c$and
+an outside word $o$, the negative sampling loss function is given
+by:
+
+\begin{equation}
+\boldsymbol{J}_{neg-sampe}(\boldsymbol{v}_{c},o,\boldsymbol{U})=-log(\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))-\sum_{k=1}^{K}log(\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c}))\label{5}
+\end{equation}
+
+for a sample $w_{1},w_{2},...,w_{K}$, where $\sigma(.)$ is a sigmoid
+function. Please report parts (b) and (c), computing the partial derivatives
+of $\boldsymbol{J}_{neg-sampe}$with respect to $\boldsymbol{v}_{c}$,
+with respect to $\boldsymbol{u}_{o}$, and with respect to a negative
+sample $\boldsymbol{u}_{k}$. Please write your answers in terms of
+the vectors $\boldsymbol{u}_{o}$, $\boldsymbol{v}_{c}$, and $\boldsymbol{u}_{k}$,
+where $k\in[1,K]$. After you have done this, describe with one sentence
+why this loss function is much more efficient to compute than the
+naive-softmax loss.
+
+Solution:
+
+Partial derivatives of $\boldsymbol{J}_{neg-sampe}$with respect to
+$\boldsymbol{v}_{c}$:
+
+\[
+\frac{\partial\boldsymbol{J}_{neg-sampe}(\boldsymbol{v}_{c},o,\boldsymbol{U})}{\partial\boldsymbol{v}_{c}}=-\frac{\partial log(\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{v}_{c}}-\sum_{k=1}^{K}\frac{\partial log(\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{v}_{c}}
+\]
+
+\[
+=-\frac{1}{\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}\frac{\partial\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}{\partial\boldsymbol{v}_{c}}-\sum_{k=1}^{K}\frac{1}{\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c})}\frac{\partial\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c})}{\partial\boldsymbol{v}_{c}}
+\]
+
+\[
+=-\frac{\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})(1-\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))}{\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}\boldsymbol{u}_{o}+\sum_{k=1}^{K}\frac{\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c})(1-\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c}))}{\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c})}\boldsymbol{u}_{k}
+\]
+
+\[
+=-(1-\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})\boldsymbol{u}_{o}+\sum_{k=1}^{K}(1-\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c}))\boldsymbol{u}_{k}
+\]
+
+Partial derivatives of $\boldsymbol{J}_{neg-sampe}$with respect to
+$\boldsymbol{u}_{o}$:
+
+\[
+\frac{\partial\boldsymbol{J}_{neg-sampe}(\boldsymbol{v}_{c},o,\boldsymbol{U})}{\partial\boldsymbol{u}_{o}}=-\frac{\partial log(\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{u}_{o}}-\sum_{k=1}^{K}\frac{\partial log(\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{u}_{o}}
+\]
+
+\[
+=-\frac{1}{\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}\frac{\partial\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}{\partial\boldsymbol{u}_{o}}-0=-\frac{\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})(1-\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))}{\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c})}\boldsymbol{v}_{c}=(1-\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))\boldsymbol{v}_{c}
+\]
+
+Partial derivatives of $\boldsymbol{J}_{neg-sampe}$with respect to
+$\boldsymbol{u}_{k}$:
+
+\[
+\frac{\partial\boldsymbol{J}_{neg-sampe}(\boldsymbol{v}_{c},o,\boldsymbol{U})}{\partial\boldsymbol{u}_{k}}=-\frac{\partial log(\sigma(\boldsymbol{u}_{o}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{u}_{k}}-\sum_{k=1}^{K}\frac{\partial log(\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c}))}{\partial\boldsymbol{u}_{k}}
+\]
+
+\[
+=-0-\frac{1}{\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c})}\frac{\partial\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c})}{\partial\boldsymbol{u}_{k}}=+\frac{\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c})(1-\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c}))}{\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c})}\boldsymbol{v}_{c}=(1-\sigma(-\boldsymbol{u}_{k}^{T}\boldsymbol{v}_{c}))\boldsymbol{v}_{c}
+\]
+(f) Suppose the center word is $c=w_{t}$ and the context window is
+$[w_{t-m},...,w_{t-1},w_{t},w_{t+1},...,w_{t+m}]$, where m is the
+context window size. Recall that for skip-gram version of word2vec,
+the total loss for the context window is:
+
+\[
+\boldsymbol{J}_{skip-gram}(\boldsymbol{v}_{c},w_{t-m},...,w_{t+m},\boldsymbol{U})=\sum_{-m<=j<=m\;j\neq0}\boldsymbol{J}(\boldsymbol{v}_{c},w_{j},\boldsymbol{U)}
+\]
+
+Write down three partial derivatives:
+
+(i) $\frac{\partial\boldsymbol{J}_{skip-gram}(\boldsymbol{v}_{c},w_{t-m},...,w_{t+m},\boldsymbol{U})}{\partial\boldsymbol{U}}$
+
+(ii) $\frac{\partial\boldsymbol{J}_{skip-gram}(\boldsymbol{v}_{c},w_{t-m},...,w_{t+m},\boldsymbol{U})}{\partial\boldsymbol{v}_{c}}$
+
+(iii) $\frac{\partial\boldsymbol{J}_{skip-gram}(\boldsymbol{v}_{c},w_{t-m},...,w_{t+m},\boldsymbol{U})}{\partial\boldsymbol{v}_{w}}$when
+$w\neq c$
+
+Solution:
+
+\[
+(i)\frac{\partial\boldsymbol{J}_{skip-gram}(\boldsymbol{v}_{c},w_{t-m},...,w_{t+m},\boldsymbol{U})}{\partial\boldsymbol{U}}=\sum_{-m<=j<=m\;j\neq0}\frac{\boldsymbol{\partial J}(\boldsymbol{v}_{c},w_{j},\boldsymbol{U)}}{\partial U}
+\]
+
+\[
+(ii)\frac{\partial\boldsymbol{J}_{skip-gram}(\boldsymbol{v}_{c},w_{t-m},...,w_{t+m},\boldsymbol{U})}{\partial\boldsymbol{v}_{c}}=\sum_{-m<=j<=m\;j\neq0}\frac{\boldsymbol{\partial J}(\boldsymbol{v}_{c},w_{j},\boldsymbol{U)}}{\partial\boldsymbol{v}_{c}}
+\]
+
+\[
+(iii)\frac{\partial\boldsymbol{J}_{skip-gram}(\boldsymbol{v}_{c},w_{t-m},...,w_{t+m},\boldsymbol{U})}{\partial\boldsymbol{u}_{w}}=\sum_{-m<=j<=m\;j\neq0}\frac{\boldsymbol{\partial J}(\boldsymbol{v}_{c},w_{j},\boldsymbol{U)}}{\partial\boldsymbol{u}_{w}}=0
+\]
+
+\end{document}
